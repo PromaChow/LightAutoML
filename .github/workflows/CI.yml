@@ -1,56 +1,109 @@
 name: CI
-
 on:
   push:
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
-
-  pull_request:
-    paths-ignore:
-      - "docs/**"
-      - "*.md"
+    branches:
+      - main
 
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
+      - name: Start Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@862050e4f01f65b1436e5eca18ba4bd85562f0de
+        with:
+          json-output: true
+          task: start-measurement
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: "3.9"
+          python-version: '3.9'
       - uses: pre-commit/action@v2.0.3
-
+      - id: display-measurement
+        name: Display Energy Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@862050e4f01f65b1436e5eca18ba4bd85562f0de
+        with:
+          json-output: true
+          task: display-results
+      - name: Save Total Energy Consumption Data
+        run: echo '${{ steps.final-measurement.outputs.data-total-json }}' > total_energy_consumption.json
+      - name: Upload Energy Consumption Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: total-energy-consumption
+          path: total_energy_consumption.json
   tests:
     needs: pre-commit
     runs-on: ${{matrix.os}}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.6, 3.7, 3.8, 3.9]
-
     steps:
+      - name: Start Energy Measurement
+        uses: green-coding-solutions/eco-ci-energy-estimation@862050e4f01f65b1436e5eca18ba4bd85562f0de
+        with:
+          json-output: true
+          task: start-measurement
       - uses: actions/checkout@v2
-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-
       - uses: Gr1N/setup-poetry@v7
         with:
           poetry-version: 1.1.7
-
-      - name: install libomp for MacOS
-        if: ${{ matrix.os == 'macos-latest' }}
+      - if: ${{ matrix.os == 'macos-latest' }}
+        name: install libomp for MacOS
         run: brew install libomp
-
+      - id: measurement-5
+        name: Record Measurement After install libomp for MacOS
+        uses: green-coding-solutions/eco-ci-energy-estimation@862050e4f01f65b1436e5eca18ba4bd85562f0de
+        with:
+          json-output: true
+          label: install libomp for MacOS
+          task: get-measurement
       - name: install tox
-        run: |
-          pip3 install tox==3.24.4
+        run: 'pip3 install tox==3.24.4
+
           pip3 install tox-gh-actions==2.8.1
 
+          '
+      - id: measurement-7
+        name: Record Measurement After install tox
+        uses: green-coding-solutions/eco-ci-energy-estimation@862050e4f01f65b1436e5eca18ba4bd85562f0de
+        with:
+          json-output: true
+          label: install tox
+          task: get-measurement
       - name: test with tox
-        run: |
-          tox
+        run: 'tox
+
+          '
+      - id: measurement-9
+        name: Record Measurement After test with tox
+        uses: green-coding-solutions/eco-ci-energy-estimation@862050e4f01f65b1436e5eca18ba4bd85562f0de
+        with:
+          json-output: true
+          label: test with tox
+          task: get-measurement
+      - id: display-measurement
+        name: Display Energy Results
+        uses: green-coding-solutions/eco-ci-energy-estimation@862050e4f01f65b1436e5eca18ba4bd85562f0de
+        with:
+          json-output: true
+          task: display-results
+      - name: Save Total Energy Consumption Data
+        run: echo '${{ steps.final-measurement.outputs.data-total-json }}' > total_energy_consumption.json
+      - name: Upload Energy Consumption Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: total-energy-consumption
+          path: total_energy_consumption.json
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+        python-version:
+          - 3.6
+          - 3.7
+          - 3.8
+          - 3.9
