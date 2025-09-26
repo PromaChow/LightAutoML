@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.8, 3.9, 3.10, 3.11, 3.12]
 
     steps:
       - name: Start Energy Measurement
@@ -27,16 +27,20 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: Gr1N/setup-poetry@v7
+      # Install Poetry (maintained action)
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
         with:
-          poetry-version: 1.1.7
+          version: 1.8.3
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
       - if: ${{ matrix.os == 'macos-latest' }}
         name: Install libomp for macOS
         run: brew install libomp
 
       - id: measurement-5
-        name: Record Measurement After install libomp for macOS
+        name: Record Measurement After libomp (macOS)
         uses: green-coding-solutions/eco-ci-energy-estimation@862050e4f01f65b1436e5eca18ba4bd85562f0de
         with:
           json-output: true
@@ -45,8 +49,8 @@ jobs:
 
       - name: Install tox
         run: |
-          pip3 install tox==3.24.4
-          pip3 install tox-gh-actions==2.8.1
+          python -m pip install --upgrade pip
+          pip install tox==3.24.4 tox-gh-actions==2.8.1
 
       - id: measurement-7
         name: Record Measurement After install tox
