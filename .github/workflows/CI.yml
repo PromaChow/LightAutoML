@@ -2,7 +2,7 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   pre-commit:
@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: "3.9"
       - uses: pre-commit/action@v2.0.3
       - id: display-measurement
         name: Display Energy Results
@@ -59,11 +59,11 @@ jobs:
           label: install libomp for MacOS
           task: get-measurement
       - name: install tox
-        run: 'pip3 install tox==3.24.4
+        run: "pip3 install tox==3.24.4
 
           pip3 install tox-gh-actions==2.8.1
 
-          '
+          "
       - id: measurement-7
         name: Record Measurement After install tox
         uses: green-coding-solutions/eco-ci-energy-estimation@862050e4f01f65b1436e5eca18ba4bd85562f0de
@@ -72,9 +72,9 @@ jobs:
           label: install tox
           task: get-measurement
       - name: test with tox
-        run: 'tox
+        run: "tox
 
-          '
+          "
       - id: measurement-9
         name: Record Measurement After test with tox
         uses: green-coding-solutions/eco-ci-energy-estimation@862050e4f01f65b1436e5eca18ba4bd85562f0de
