@@ -13,11 +13,11 @@ jobs:
         with:
           json-output: true
           task: start-measurement
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.9"
-      - uses: pre-commit/action@v2.0.3
+      - uses: pre-commit/action@v4.0.3
       - id: display-measurement
         name: Display Energy Results
         uses: green-coding-solutions/eco-ci-energy-estimation@862050e4f01f65b1436e5eca18ba4bd85562f0de
@@ -40,9 +40,9 @@ jobs:
         with:
           json-output: true
           task: start-measurement
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - uses: Gr1N/setup-poetry@v7
